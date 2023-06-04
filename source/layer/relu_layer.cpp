@@ -63,11 +63,13 @@ namespace kuiper_infer
     }
   }
 
+  // 让一个Layer类型的对象指向ReluLayer对象
   std::shared_ptr<Layer> ReluLayer::CreateInstance(const std::shared_ptr<Operator> &op)
   {
     std::shared_ptr<Layer> relu_layer = std::make_shared<ReluLayer>(op);
     return relu_layer;
   }
 
-  LayerRegistererWrapper kReluLayer(OpType::kOperatorRelu, ReluLayer::CreateInstance); // 构造一个LayerRegistererWrapper类的对象
+  // 构造一个LayerRegistererWrapper类的对象
+  LayerRegistererWrapper kReluLayer(OpType::kOperatorRelu, ReluLayer::CreateInstance);
 }
