@@ -10,8 +10,8 @@
 
 namespace kuiper_infer {
 
-void RuntimeGraphShape::InitOperatorInputTensor(
-    const std::vector<std::shared_ptr<RuntimeOperator>> &operators) {
+void RuntimeGraphShape::InitOperatorInputTensor( // 初始化图中所有operator的InputTensor
+    const std::vector<std::shared_ptr<RuntimeOperator>> &operators) { // 这里传入的operators是整个图的operators
   if (operators.empty()) {
     LOG(ERROR) << "Operators for init input shapes is empty!";
     return;
@@ -21,14 +21,14 @@ void RuntimeGraphShape::InitOperatorInputTensor(
       continue;
     } else {
       const std::map<std::string, std::shared_ptr<RuntimeOperand>> &
-          input_operands_map = op->input_operands;
+          input_operands_map = op->input_operands; // map的原因是因为可能不止一个输入
       for (const auto &input_operand_iter : input_operands_map) {
         const auto &input_operand = input_operand_iter.second;
         const auto &type = input_operand->type;
         CHECK(type == RuntimeDataType::kTypeFloat32)
                 << "The graph only support float32 yet!";
-        const auto &input_operand_shape = input_operand->shapes;
-        auto &input_datas = input_operand->datas;
+        const auto &input_operand_shape = input_operand->shapes; // 输入操作数的维度
+        auto &input_datas = input_operand->datas; // 所有输入操作数
 
         CHECK(!input_operand_shape.empty());
         const int32_t batch = input_operand_shape.at(0);
@@ -40,13 +40,13 @@ void RuntimeGraphShape::InitOperatorInputTensor(
 
         if (!input_datas.empty()) {
           CHECK(input_datas.size() == batch) << "Batch size is wrong!";
-          for (int32_t i = 0; i < batch; ++i) {
+          for (int32_t i = 0; i < batch; ++i) { // 检查输入数据是否都符合规定的形状
             const std::vector<uint32_t> &input_data_shape =
                 input_datas.at(i)->shapes();
             CHECK(input_data_shape.size() == 3)
                     << "THe origin shape size of operator input data do not equals "
                        "to three";
-            if (input_operand_shape.size() == 4) {
+            if (input_operand_shape.size() == 4) { // batch_size, channel, cols, rows
               CHECK(input_data_shape.at(0) == input_operand_shape.at(1) &&
                   input_data_shape.at(1) == input_operand_shape.at(2) &&
                   input_data_shape.at(2) == input_operand_shape.at(3));
@@ -60,7 +60,7 @@ void RuntimeGraphShape::InitOperatorInputTensor(
                   input_data_shape.at(2) == input_operand_shape.at(2));
             }
           }
-        } else {
+        } else { // 如果输入数据是空的，根据输入操作数(input_operands)的shape在输入数据(input_datas)的相应位置上创建向量
           input_datas.resize(batch);
           for (int32_t i = 0; i < batch; ++i) {
             if (input_operand_shape.size() == 4) {
@@ -204,7 +204,7 @@ bool RuntimeGraph::Init() {
   }
 
   //
-  std::vector<pnnx::Operator *> operators = this->graph_->ops;
+  std::vector<pnnx::Operator *> operators = this->graph_->ops; // 从pnnx中读取到的operators
   if (operators.empty()) {
     LOG(ERROR) << "Can not read the layers' define";
     return false;
@@ -278,6 +278,7 @@ bool RuntimeGraph::Init() {
   return true;
 }
 
+// 对于操作数，其实要初始化的就只有它的【名字、形状和类型】
 void RuntimeGraph::InitInputOperators(const std::vector<pnnx::Operand *> &inputs,
                                       const std::shared_ptr<RuntimeOperator> &runtime_operator) {
   for (const pnnx::Operand *input : inputs) {
@@ -286,10 +287,10 @@ void RuntimeGraph::InitInputOperators(const std::vector<pnnx::Operand *> &inputs
     }
     const pnnx::Operator *producer = input->producer;
     std::shared_ptr<RuntimeOperand> runtime_operand = std::make_shared<RuntimeOperand>();
-    runtime_operand->name = producer->name;
-    runtime_operand->shapes = input->shape;
+    runtime_operand->name = producer->name; // 名字
+    runtime_operand->shapes = input->shape; // 形状
 
-    switch (input->type) {
+    switch (input->type) { // 类型
       case 1: {
         runtime_operand->type = RuntimeDataType::kTypeFloat32;
         break;
@@ -431,6 +432,7 @@ void RuntimeGraph::Build(const std::string &input_name, const std::string &outpu
   this->input_operators_maps_.clear();
   this->output_operators_maps_.clear();
 
+  // 找到整个计算图的开始节点和结束节点
   for (const auto &kOperator : this->operators_) {
     if (kOperator->type == "pnnx.Input") {
       this->input_operators_maps_.insert({kOperator->name, kOperator});
@@ -440,8 +442,8 @@ void RuntimeGraph::Build(const std::string &input_name, const std::string &outpu
       // 以后的课中加layer的
     }
   }
-  RuntimeGraphShape::InitOperatorInputTensor(operators_);
-  RuntimeGraphShape::InitOperatorOutputTensor(graph_->ops, operators_);
+  RuntimeGraphShape::InitOperatorInputTensor(operators_); // 初始化整个图的InputTensor
+  RuntimeGraphShape::InitOperatorOutputTensor(graph_->ops, operators_); // 初始化整个图的OutputTensor
   graph_state_ = GraphState::Complete;
   input_name_ = input_name;
   output_name_ = output_name;

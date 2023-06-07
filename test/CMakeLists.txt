@@ -1,5 +1,6 @@
 find_package(GTest REQUIRED)
 
+include_directories("../include")
 aux_source_directory(../test DIR_TEST)
 set(link_lib glog gtest pthread)
 set(link_math_lib armadillo blas lapack)
