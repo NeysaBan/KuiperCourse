@@ -79,12 +79,13 @@ void ConvolutionLayer::Forwards(const std::vector<std::shared_ptr<Tensor<float>>
       CHECK(kernel->channels() == input_c / groups);
     }
 
-    uint32_t row_len = kernel_w * kernel_h;
+    uint32_t row_len = kernel_w * kernel_h; // 卷积核展开后一行有多少数字
     uint32_t col_len = output_h * output_w;
     if (!col_len) {
       col_len = 1;
     }
-
+    
+    // 处理卷积核
     uint32_t input_c_group = input_c / groups;
     uint32_t kernel_count_group = kernel_count / groups;
 
@@ -97,7 +98,7 @@ void ConvolutionLayer::Forwards(const std::vector<std::shared_ptr<Tensor<float>>
             weights.at(k + g * kernel_count_group);
         for (uint32_t ic = 0; ic < input_c_group; ++ic) {
           memcpy(kernel_matrix_c.memptr() + row_len * ic,
-                 kernel->at(ic).memptr(), row_len * sizeof(float));
+                 kernel->at(ic).memptr(), row_len * sizeof(float)); // 博客中画的卷积核、input是行主序，卷积核展开时是按列展开，这里原本也是列主序，因此可以直接memcpy
         }
         LOG(INFO) << "kernel展开后: " << "\n" << kernel_matrix_c;
         kernel_matrix_arr.at(k) = kernel_matrix_c;
@@ -114,8 +115,8 @@ void ConvolutionLayer::Forwards(const std::vector<std::shared_ptr<Tensor<float>>
             current_col += 1;
 
             for (uint32_t kw = 0; kw < kernel_w; ++kw) {
-              const float *region_ptr = input_channel.colptr(w + kw) + r;
-              memcpy(input_matrix_c_ptr, region_ptr, kernel_h * sizeof(float));
+              const float *region_ptr = input_channel.colptr(w + kw) + r; // 当前region的开始位置
+              memcpy(input_matrix_c_ptr, region_ptr, kernel_h * sizeof(float)); // 每次拷贝kernel_h个元素
               input_matrix_c_ptr += kernel_h;
             }
           }
