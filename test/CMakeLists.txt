@@ -1,3 +1,11 @@
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0012 NEW) 
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
+set(CMAKE_BUILD_TYPE "Debug") ## add for debug
+
+include_directories("../include")
 find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 find_package(Armadillo REQUIRED)
@@ -17,6 +25,7 @@ add_executable(test_kuiper ./test_main.cpp ${DIR_TEST})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=native")
 
 target_link_libraries(test_kuiper ${OpenCV_LIBS} kuiper)
+target_link_libraries(test_kuiper ${OpenCV_LIBS})
 target_link_libraries(test_kuiper ${link_lib} ${link_math_lib})
 target_link_directories(test_kuiper PUBLIC ${PROJECT_SOURCE_DIR}/lib)
 target_link_libraries(test_kuiper kuiper)
