@@ -20,12 +20,12 @@ void RuntimeOperatorUtils::InitOperatorInput(
     return;
   }
 
-  for (const auto& op : operators) {
+  for (const auto& op : operators) { // 开始遍历
     if (op->input_operands.empty()) {
       continue;
     } else {
       const std::map<std::string, std::shared_ptr<RuntimeOperand>>&
-          input_operands_map = op->input_operands;
+          input_operands_map = op->input_operands; // 每个operator的输入是一个map，因为可以有多个
       // 初始化operator的输入空间
       for (const auto& input_operand_iter : input_operands_map) {
         const auto& input_operand = input_operand_iter.second;
@@ -41,13 +41,13 @@ void RuntimeOperatorUtils::InitOperatorInput(
         CHECK(batch >= 0) << "Dynamic batch size is not supported!";
         CHECK(input_operand_shape.size() == 2 ||
               input_operand_shape.size() == 4 ||
-              input_operand_shape.size() == 3)
+              input_operand_shape.size() == 3) // size 只能等于2/3/4
             << "Unsupported tensor shape sizes: " << input_operand_shape.size();
 
-        if (!input_datas.empty()) {
-          CHECK_EQ(input_datas.size(), batch);
-        } else {
-          input_datas.resize(batch);
+        if (!input_datas.empty()) { // 如果数据非空，也就是不是第一次运行
+          CHECK_EQ(input_datas.size(), batch); // 就直接检查数据形状
+        } else { // 反之
+          input_datas.resize(batch); // 根据batch resize一下,input_datas(std::vector<std::shared_ptr<Tensor<float>>>),这里的意思就是，把里面那个vector的元素数目都改成batch大小
         }
       }
     }

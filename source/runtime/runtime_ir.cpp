@@ -93,7 +93,7 @@ void RuntimeGraph::Build(const std::string& input_name,
   if (graph_state_ == GraphState::NeedInit) {
     bool init_graph = Init();
     LOG_IF(FATAL, !init_graph) << "Init graph failed!";
-  }
+  }                 
 
   CHECK(graph_state_ >= GraphState::NeedBuild)
       << "Graph status error, current state is " << int(graph_state_);

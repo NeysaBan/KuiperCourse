@@ -162,6 +162,6 @@ ParseParameterAttrStatus LinearLayer::GetInstance(
 }
 
 LayerRegistererWrapper kLinearGetInstance("nn.Linear",
-                                          LinearLayer::GetInstance);
+                                          LinearLayer::GetInstance); // 调用LayerRegistererWrapper构造函数
 
 }  // namespace kuiper_infer

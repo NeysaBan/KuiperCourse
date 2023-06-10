@@ -5,6 +5,8 @@ include_directories(./include)
 option(BUILD_DEMO "BUILD THE DEMO PROJECT")
 set(BUILD_DEMO ON)
 
+set(CMAKE_BUILD_TYPE "Debug") ## add for debug
+
 #if (BUILD_DEMO)
 #    MESSAGE(STATUS "BUILD DEMO PROJECT")
 #    add_subdirectory(demos)
